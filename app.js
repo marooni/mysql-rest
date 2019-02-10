@@ -8,6 +8,8 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
+var mysql = require("mysql");
+var config = require('./config.json');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -20,7 +22,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/v1/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -38,16 +40,22 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-var mysql = require("mysql");
 //Database connection
 app.use(function(req, res, next){
-	res.locals.connection = mysql.createConnection({
-		host     : 'localhost',
-		user     : 'root',
-		password : ' ',
-		database : 'test'
+	global.connection = mysql.createConnection({
+		host     : config.host,
+		user     : config.user,
+		password : config.password,
+		database : config.database
 	});
-	res.locals.connect();
+	//res.locals.connect();
+	connection.connect(function(err){
+	  if(err){
+	    console.log('Error connecting to Db');
+	    return;
+	  }
+	  console.log('Connection established');
+	});
 	next();
 });
 
