@@ -4,20 +4,19 @@ var db = require('../db');
 
 var router = express.Router();
 
-/* GET users listing. */
-//router.get('/', function(req, res, next) {
-//  res.send('respond with a resource');
-//});
+router.get('/:orbit', function(req, res, next) {
+	var orbit = req.params.orbit
+	var sql = `select orbit_number, product_type, sensing_start_time, sensing_stop_time, revision, product_status, message_creation_time, message from proc_ofl where product_status != 'SUCCESS' and event_type = 'ProdGenerated' and product_type like 'S5P.TROPOMI.%' and orbit_number = ${orbit} order by sensing_start_time`;
 
-
-router.get('/', function(req, res, next) {
-	db.query('select * from arc_archived_ofl where product_type = \'S5P.TROPOMI.L1B\'', function (error, results, fields) {
+	db.query(sql, function (error, results, fields) 
+	{
 	  	if(error){
 	  		res.send(JSON.stringify({"status": 500, "error": error, "response": null})); 
 	  		//If there is error, we send the error in the error section with 500 status
 	  	} else {
+	  		res.setHeader('Content-Type', 'application/json');
   			res.send(JSON.stringify(results, null, 4));
-  			//If there is no error, all is good and response is 200OK.
+  			//res.json({ a: 1 });
 	  	}
   	});
 });
